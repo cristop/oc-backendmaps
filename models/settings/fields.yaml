@@ -1,0 +1,25 @@
+tabs:
+  fields:
+    address_map_key:
+      label: 'cristo.backendmaps::lang.settings.address_map_key'
+      comment: 'cristo.backendmaps::lang.settings.address_map_key_comment'
+      size: small
+      span: left
+      type: text
+      tab: 'cristo.backendmaps::lang.settings.tab'
+    address_map:
+      label: 'cristo.backendmaps::lang.settings.address_map'
+      comment: 'cristo.backendmaps::lang.settings.address_map_comment'
+      size: small
+      span: left
+      type: backendmaps
+      fieldPosition:
+          latitude: '39.02610162777133'
+          longitude: '1.4830825124974565'
+      tab: 'cristo.backendmaps::lang.settings.tab'
+    default_location:
+      label: 'Default Location (lat, long)'
+      comment: ''
+      span: left
+      type: text
+      tab: 'cristo.backendmaps::lang.settings.tab'

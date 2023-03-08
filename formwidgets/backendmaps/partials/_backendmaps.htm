@@ -1,0 +1,84 @@
+<?php if ($this->previewMode): ?>
+    <div class="form-control"><?= e($value) ?></div>
+<?php else: ?>
+    <div
+        id="<?= $this->getId() ?>"
+        class="field-google-place" <?= $field->getAttributes() ?> <?= $this->getFieldMapAttributes() ?>>
+        <div id="<?= $this->getId('textarea') ?>-div" style="height: 300px; width: 100%"></div>
+        <br>
+        <label for="Form-field-Property-map" class="form-label">
+            Latitude And Longitude            
+        </label>
+        <input
+            type="text"
+            name="<?= $name ?>"
+            id="<?= $this->getId('textarea') ?>"
+            value="<?= e($value) ?>"
+            class="form-control"
+            data-control="location-autocomplete"
+            onkeypress="CheckNumeric(event);"
+            <?= $field->getAttributes() ?>
+            <?= $this->getFieldMapAttributes() ?>
+            />
+    </div>
+<?php endif ?>
+
+<style>
+.field-google-place[disabled="1"]{
+    pointer-events: none;
+}
+.field-google-place[disabled="1"] #<?= $this->getId('textarea') ?>-div{
+    opacity: 0.8;
+}
+</style>
+
+<script type="text/javascript">
+$(function(){
+    removeWhiteSpaces($("#<?= $this->getId('textarea') ?>"));
+    createMap();    
+
+    $("#<?= $this->getId('textarea') ?>").on("paste", function(event) {
+        removeWhiteSpaces($(this));
+        setTimeout(createMap, 500);
+    });
+    $("#<?= $this->getId('textarea') ?>").keyup(function(event) {
+        removeWhiteSpaces($(this));
+        if (event.which === 13) {
+            createMap();
+        }
+    });
+});
+
+function removeWhiteSpaces(selector){
+    selector.val(selector.val().split(" ").join(""));
+}
+
+function createMap(){
+    let fieldName = "<?= $field->fieldName; ?>"
+    let mapDiv = "<?= $this->getId('textarea') ?>";
+    let getMapPosition = $("#" + mapDiv).val().split(',');
+
+    marker["<?= $field->fieldName; ?>"] = fieldName;
+    inicializar(getMapPosition[0], getMapPosition[1], 14, fieldName, mapDiv, true);
+}
+
+
+
+function CheckNumeric(e) {
+    if (window.event) // IE
+    {
+        if ((e.keyCode <48 || e.keyCode > 57) & e.keyCode != 8 && e.keyCode != 44) {
+            event.returnValue = false;
+            return false;
+        }
+    }
+    else { // Fire Fox
+        if ((e.which <48 || e.which > 57) & e.which != 8 && e.which != 44) {
+            e.preventDefault();
+            return false;
+        }
+    }
+}
+
+
+</script>
