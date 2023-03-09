@@ -68,6 +68,13 @@ class BackendMaps extends FormWidgetBase
         return Html::attributes($result);
     }
 
+    public function getApiKey()
+    {
+        $result = $this->apiKey;
+
+        return $result;
+    }
+
     public function loadAssets()
     {
         $this->_setFromSettings();

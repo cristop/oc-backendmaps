@@ -5,9 +5,10 @@
         id="<?= $this->getId() ?>"
         class="field-google-place" <?= $field->getAttributes() ?> <?= $this->getFieldMapAttributes() ?>>
         <div id="<?= $this->getId('textarea') ?>-div" style="height: 300px; width: 100%"></div>
+        
         <br>
         <label for="Form-field-Property-map" class="form-label">
-            Latitude And Longitude            
+            Latitud y longitud
         </label>
         <input
             type="text"
@@ -15,12 +16,35 @@
             id="<?= $this->getId('textarea') ?>"
             value="<?= e($value) ?>"
             class="form-control"
+            placeholder=""
             data-control="location-autocomplete"
-            onkeypress="CheckNumeric(event);"
+            onkeypress="CheckNumeric<?= str_replace("-", "", $this->getId()) ?>(event);"
             <?= $field->getAttributes() ?>
             <?= $this->getFieldMapAttributes() ?>
             />
+
+        <br>
+        <div style="display:flex; gap:10px">
+            <input
+                type="text"
+                name="direction-<?= $name ?>"
+                id="direction-<?= $this->getId('textarea') ?>"
+                class="form-control"
+                placeholder="Buscar dirección"
+                data-control="location-autocomplete"
+                onkeypress="CheckEnter<?= str_replace("-", "", $this->getId()) ?>(event);"
+                <?= $field->getAttributes() ?>
+                <?= $this->getFieldMapAttributes() ?>
+                />
+            <a href="#" class="btn btn-secondary" id="buscar-<?= $this->getId('textarea') ?>" onclick="localizar($('#direction-<?= $this->getId('textarea') ?>').val()); return false;">
+                <i class="icon-search"></i>
+                Buscar
+            </a>
+        </div>
+        <p class="help-block">Example: Space Needle,Seattle WA</p>
+
     </div>
+    <br>
 <?php endif ?>
 
 <style>
@@ -41,6 +65,7 @@ $(function(){
         removeWhiteSpaces($(this));
         setTimeout(createMap, 500);
     });
+
     $("#<?= $this->getId('textarea') ?>").keyup(function(event) {
         removeWhiteSpaces($(this));
         if (event.which === 13) {
@@ -53,32 +78,73 @@ function removeWhiteSpaces(selector){
     selector.val(selector.val().split(" ").join(""));
 }
 
-function createMap(){
+function createMap(lat,long){
     let fieldName = "<?= $field->fieldName; ?>"
     let mapDiv = "<?= $this->getId('textarea') ?>";
     let getMapPosition = $("#" + mapDiv).val().split(',');
 
+    if(lat == null || long == null){
+        lat = getMapPosition[0];
+        long = getMapPosition[1];
+    }
+
     marker["<?= $field->fieldName; ?>"] = fieldName;
-    inicializar(getMapPosition[0], getMapPosition[1], 14, fieldName, mapDiv, true);
+    inicializar(lat, long, 14, fieldName, mapDiv, true);
 }
 
-
-
-function CheckNumeric(e) {
-    if (window.event) // IE
-    {
-        if ((e.keyCode <48 || e.keyCode > 57) & e.keyCode != 8 && e.keyCode != 44) {
-            event.returnValue = false;
-            return false;
-        }
-    }
-    else { // Fire Fox
-        if ((e.which <48 || e.which > 57) & e.which != 8 && e.which != 44) {
-            e.preventDefault();
-            return false;
-        }
-    }
+function CheckNumeric<?= str_replace("-", "", $this->getId()) ?>(e) {
+    if (window.event) { // IE
+        if ((e.keyCode <48 || e.keyCode > 57) & e.keyCode != 8 && e.keyCode != 44) {
+            event.returnValue = false;
+            return false;
+        }
+    }else { // Fire Fox
+        if ((e.which <48 || e.which > 57) & e.which != 8 && e.which != 44) {
+            e.preventDefault();
+            return false;
+        }
+    }
 }
 
+function CheckEnter<?= str_replace("-", "", $this->getId()) ?>(e) {
+    if (window.event) { // IE
+        if (e.key === 'Enter' || e.keyCode === 13)  {
+            e.returnValue = false;
+            $('a#buscar-<?= $this->getId('textarea') ?>').trigger('click');
+            return false;
+        }
+    }else { // Fire Fox
+        if (e.which === 13) {
+            e.preventDefault();
+            $('a#buscar-<?= $this->getId('textarea') ?>').trigger('click');
+            return false;
+        }
+    }
+}
 
+//busqueda por direccion
+function localizar(direccion) {
+	var geocoder = new google.maps.Geocoder();
+	
+	geocoder.geocode({'address': direccion}, function(results, status) {
+		if (status === 'OK') {
+			var resultados = results[0].geometry.location,
+				resultados_lat = resultados.lat(),
+				resultados_long = resultados.lng();
+    
+                $('#<?= $this->getId('textarea') ?>').val(resultados_lat+','+resultados_long);
+               createMap(resultados_lat, resultados_long);
+		} else {
+			var mensajeError = "";
+			if (status === "ZERO_RESULTS") {
+				mensajeError = "No hubo resultados para la dirección ingresada.";
+			} else if (status === "OVER_QUERY_LIMIT" || status === "REQUEST_DENIED" || status === "UNKNOWN_ERROR") {
+				mensajeError = "Error general del mapa.";
+			} else if (status === "INVALID_REQUEST") {
+				mensajeError = "Error de la web. Contacte con Name Agency.";
+			}
+			alert(mensajeError);
+		}
+	});
+}
 </script>
