@@ -87,4 +87,26 @@ class gMap extends ComponentBase
         // Google Maps API KEY
         $this->apiKey = $settings->address_map_key;
     }
+
+    public function getAddressFromLatLng($lat, $lng) {
+        $settings = Settings::instance();
+        $apiKey = $settings->address_map_key; // Reemplaza con tu propia clave de API de Google Maps
+        
+        $url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=$apiKey";
+        
+        $response = file_get_contents($url);
+        
+        if ($response !== false) {
+          $data = json_decode($response, true);
+          
+          if ($data['status'] === 'OK') {
+            $address = $data['results'][0]['formatted_address'];
+            return $address;
+          } else {
+            return 'No se encontraron resultados';
+          }
+        } else {
+          return 'Error al obtener la dirección';
+        }
+      }
 }
