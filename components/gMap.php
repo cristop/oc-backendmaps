@@ -88,25 +88,115 @@ class gMap extends ComponentBase
         $this->apiKey = $settings->address_map_key;
     }
 
-    public function getAddressFromLatLng($lat, $lng) {
+    
+    public static function getAddressFromLatLng($lat, $lng) {
         $settings = Settings::instance();
         $apiKey = $settings->address_map_key; // Reemplaza con tu propia clave de API de Google Maps
-        
+    
         $url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=$apiKey";
-        
+    
         $response = file_get_contents($url);
-        
+    
         if ($response !== false) {
-          $data = json_decode($response, true);
-          
-          if ($data['status'] === 'OK') {
-            $address = $data['results'][0]['formatted_address'];
-            return $address;
-          } else {
-            return 'No se encontraron resultados';
-          }
+            $data = json_decode($response, true);
+    
+            if ($data['status'] === 'OK') {
+                $formattedAddress = $data['results'][0]['formatted_address'];
+                $addressComponents = $data['results'][0]['address_components'];
+    
+                $address = array(
+                    'street_number' => '',
+                    'route' => '',
+                    'neighborhood' => '',
+                    'sublocality' => '',
+                    'locality' => '',
+                    'administrative_area_level_1' => '',
+                    'administrative_area_level_2' => '',
+                    'postal_code' => '',
+                    'country' => '',
+                    'complete' => $formattedAddress
+                );
+    
+                foreach ($addressComponents as $component) {
+                    $types = $component['types'];
+                    $longName = $component['long_name'];
+    
+                    if (in_array('street_number', $types)) {
+                        $address['street_number'] = $longName;
+                    }
+                    /* si no encontro number, pone 1 por defecto */
+                    if (empty($address['street_number'])) {
+                        $address['street_number'] = '1';
+                    }
+    
+                    if (in_array('route', $types)) {
+                        $address['route'] = $longName;
+                    }
+    
+                    if (in_array('neighborhood', $types)) {
+                        $address['neighborhood'] = $longName;
+                    }
+    
+                    if (in_array('sublocality', $types)) {
+                        $address['sublocality'] = $longName;
+                    }
+    
+                    if (in_array('locality', $types)) {
+                        $address['locality'] = $longName;
+                    }
+    
+                    if (in_array('administrative_area_level_1', $types)) {
+                        $address['administrative_area_level_1'] = $longName;
+                    }
+    
+                    if (in_array('administrative_area_level_2', $types)) {
+                        $address['administrative_area_level_2'] = $longName;
+                    }
+    
+                    if (in_array('postal_code', $types)) {
+                        $address['postal_code'] = $longName;
+                    }
+    
+                    if (in_array('country', $types)) {
+                        $address['country'] = $longName;
+                    }
+                }
+    
+                // Comprobar si street_number y route están vacíos
+                if (empty($address['route'])) {
+                    // Usar el valor de long_name de Trinitat Nova como street si no hay street_number y route
+                    foreach ($addressComponents as $component) {
+                        if (in_array('establishment', $component['types'])) {
+                            $address['route'] = $component['long_name'];
+                            break; // Salir del bucle una vez se encuentra la coincidencia
+                        }
+                    }
+                }
+    
+                return $address;
+            } else {
+                return array('error' => 'No se encontraron resultados');
+            }
         } else {
-          return 'Error al obtener la dirección';
+            return array('error' => 'Error al obtener la dirección');
         }
-      }
+    }
+    /*
+    // para llamar desde otro plugin:
+    use Cristo\BackendMaps\Components\gMap as BackendMaps;
+    */
+    /*
+    $result = BackendMaps::getAddressFromLatLng($ubicacion[0], $ubicacion[1]);
+
+    echo $result['complete'] . " "; // Cadena completa
+    echo $result['street_number'] . " "; // Número de calle
+    echo $result['route'] . " "; // Calle
+    echo $result['neighborhood'] . " "; // Barrio
+    echo $result['sublocality'] . " "; // Sublocalidad
+    echo $result['locality'] . " "; // Localidad
+    echo $result['administrative_area_level_1'] . " "; // Área administrativa de nivel 1 (Estado/Provincia)
+    echo $result['administrative_area_level_2'] . " "; // Área administrativa de nivel 2 (Ciudad/Condado)
+    echo $result['postal_code'] . " "; // Código postal
+    echo $result['country'] . " "; // País
+    */
 }
