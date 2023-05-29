@@ -88,7 +88,7 @@ class gMap extends ComponentBase
         $this->apiKey = $settings->address_map_key;
     }
 
-    
+    /*  FUNCION PARA DEVOLVER INFORMACION DESDE UNA LATITUD Y LONGITUD DADA */
     public static function getAddressFromLatLng($lat, $lng) {
         $settings = Settings::instance();
         $apiKey = $settings->address_map_key; // Reemplaza con tu propia clave de API de Google Maps
@@ -182,7 +182,7 @@ class gMap extends ComponentBase
         }
     }
     /*
-    // para llamar desde otro plugin:
+    // para llamar getAddressFromLatLng() desde otro plugin:
     use Cristo\BackendMaps\Components\gMap as BackendMaps;
     */
     /*
