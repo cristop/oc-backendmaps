@@ -3,6 +3,7 @@
 use System\Classes\PluginBase;
 use System\Classes\PluginManager;
 use System\Classes\SettingsManager;
+use Cristo\BackendMaps\Models\Settings;
 
 /**
  * Backend Google Maps Plugin Information File
@@ -63,5 +64,11 @@ class Plugin extends PluginBase
                 'code'  => 'backendmaps'
             ]
         ];
+    }
+
+    public function getApiKey(){
+        $settings = Settings::instance();
+
+        return $settings->address_map_key;
     }
 }
